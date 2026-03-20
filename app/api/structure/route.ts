@@ -44,19 +44,27 @@ export async function POST(req: Request) {
         ],
         "references": {
           "relatedLinks": [
-            {"title": "descriptive site name", "url": "https://real-url.com"}
+            {"name": "Site Name", "url": "https://...", "description": "brief what this site offers"},
+            {"name": "Site Name", "url": "https://...", "description": "brief what this site offers"}
           ],
           "costsAndBudgets": [
-            {"title": "descriptive site name", "url": "https://real-url.com"}
+            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
+            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
+            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
+            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
+            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"}
           ],
           "funFacts": [
-            {"title": "fact or trend headline", "url": "https://real-source-url.com"}
+            {"fact": "an interesting short fact or trend about this topic"},
+            {"fact": "an interesting short fact or trend about this topic"},
+            {"fact": "an interesting short fact or trend about this topic"}
           ]
         }
       }
       
       Respond only with the JSON object. No extra text or markdown.
     `;
+
 
 
 

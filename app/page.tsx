@@ -490,16 +490,17 @@ export default function Home() {
                   {result.references?.relatedLinks?.map((link: any, idx: number) => (
                     <a
                       key={idx}
-                      href={typeof link === 'string' ? link : link.url}
+                      href={link.url || link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="glass rounded-lg p-3 text-xs text-slate-300 border-slate-800 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all flex items-center gap-2 group"
+                      className="glass rounded-lg p-3 text-xs border-slate-800 hover:border-blue-500/30 transition-all flex flex-col gap-1 group hover:bg-blue-500/5"
                     >
-                      <Globe className="w-3 h-3 text-blue-500/40 group-hover:text-blue-400 flex-none" />
-                      <span className="group-hover:text-blue-400 transition-colors truncate">
-                        {typeof link === 'string' ? link : link.title}
-                      </span>
-                      <span className="ml-auto text-slate-600 group-hover:text-blue-400 flex-none">↗</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500/50 group-hover:bg-blue-500 flex-none" />
+                        <span className="font-semibold text-blue-300 group-hover:text-blue-200 transition-colors truncate">{link.name || link}</span>
+                      </div>
+                      {link.description && <p className="text-slate-500 pl-3.5 text-[10px] leading-relaxed">{link.description}</p>}
+                      {link.url && <p className="text-slate-600 pl-3.5 text-[9px] truncate group-hover:text-slate-500">{link.url}</p>}
                     </a>
                   ))}
                 </div>
@@ -515,16 +516,17 @@ export default function Home() {
                   {result.references?.costsAndBudgets?.map((cost: any, idx: number) => (
                     <a
                       key={idx}
-                      href={typeof cost === 'string' ? '#' : cost.url}
+                      href={cost.url || '#'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="glass rounded-lg p-3 text-xs text-slate-300 border-slate-800 hover:border-green-500/40 hover:bg-green-500/5 transition-all flex items-center gap-2 group"
+                      className="glass rounded-lg p-3 text-xs border-slate-800 hover:border-green-500/30 transition-all flex flex-col gap-1 group hover:bg-green-500/5"
                     >
-                      <DollarSign className="w-3 h-3 text-green-500/40 group-hover:text-green-400 flex-none" />
-                      <span className="group-hover:text-green-400 transition-colors truncate">
-                        {typeof cost === 'string' ? cost : cost.title}
-                      </span>
-                      <span className="ml-auto text-slate-600 group-hover:text-green-400 flex-none">↗</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500/50 group-hover:bg-green-500 flex-none" />
+                        <span className="font-semibold text-green-300 group-hover:text-green-200 transition-colors truncate">{cost.name || cost}</span>
+                      </div>
+                      {cost.description && <p className="text-slate-500 pl-3.5 text-[10px] leading-relaxed">{cost.description}</p>}
+                      {cost.url && <p className="text-slate-600 pl-3.5 text-[9px] truncate group-hover:text-slate-500">{cost.url}</p>}
                     </a>
                   ))}
                 </div>
@@ -537,25 +539,15 @@ export default function Home() {
                   Facts & Trends
                 </div>
                 <div className="space-y-2">
-                  {result.references?.funFacts?.map((fact: any, idx: number) => (
-                    <a
-                      key={idx}
-                      href={typeof fact === 'string' ? '#' : fact.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="glass rounded-lg p-3 text-xs text-slate-300 border-slate-800 hover:border-yellow-500/40 hover:bg-yellow-500/5 transition-all flex items-center gap-2 group"
-                    >
-                      <Lightbulb className="w-3 h-3 text-yellow-500/40 group-hover:text-yellow-400 flex-none" />
-                      <span className="group-hover:text-yellow-400 transition-colors truncate">
-                        {typeof fact === 'string' ? fact : fact.title}
-                      </span>
-                      <span className="ml-auto text-slate-600 group-hover:text-yellow-400 flex-none">↗</span>
-                    </a>
+                  {result.references?.funFacts?.map((item: any, idx: number) => (
+                    <div key={idx} className="glass rounded-lg p-3 text-xs text-slate-300 border-slate-800 hover:border-yellow-500/20 transition-colors flex items-start gap-2 group hover:bg-yellow-500/5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50 group-hover:bg-yellow-500 flex-none mt-1" />
+                      <p className="leading-relaxed">{item.fact || item}</p>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
