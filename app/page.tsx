@@ -10,57 +10,80 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const [showToast, setShowToast] = useState(false);
+
   useEffect(() => {
     setMounted(true);
-    console.log("React Hydration Complete. Site is interactive.");
   }, []);
 
-
   const handleGenerate = async () => {
-    if (isGenerating) {
-      window.alert("Please wait, the AI is already working!");
-      return;
-    }
-    if (!input.trim()) {
-      window.alert("Please type your idea in the text area above before clicking!");
-      return;
-    }
-    window.alert("SUCCESS: Click registered! Sending your idea to the AI now...");
+    if (isGenerating || !input.trim()) return;
     
     setIsGenerating(true);
     setResult(null);
     setErrorMsg("");
+    
     try {
-      console.log("Fetching /api/structure...");
       const res = await fetch("/api/structure", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idea: input }),
       });
-      console.log("Response received. Status:", res.status);
       const data = await res.json();
-      console.log("Data parsed:", data);
       
       if (!res.ok || data.error) {
         setErrorMsg(data.error || "Failed to generate plan.");
+        setIsGenerating(false);
         return;
       }
       
       setResult(data);
-      // Wait for state to update then scroll to results
+      setIsGenerating(false);
       setTimeout(() => {
-        const root = document.getElementById("results-root");
-        if (root) {
-          root.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        document.getElementById("results-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 500);
     } catch (error: any) {
-      console.error(error);
       setErrorMsg(error.message || "An unexpected error occurred.");
-    } finally {
       setIsGenerating(false);
     }
   };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  };
+
+  const ClarityGauge = ({ score }: { score: number }) => {
+    const radius = 35;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (score / 100) * circumference;
+
+    return (
+      <div className="relative flex items-center justify-center w-24 h-24 drop-shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle cx="48" cy="48" r={radius} stroke="currentColor" strokeWidth="6" fill="transparent" className="text-blue-500/10" />
+          <circle
+            cx="48"
+            cy="48"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="6"
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="text-blue-500 transition-all duration-1000 ease-out"
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+          <span className="text-xl font-bold text-white">{score}</span>
+          <span className="text-[8px] uppercase tracking-widest text-blue-300/60 font-medium">Clarity</span>
+        </div>
+      </div>
+    );
+  };
+
 
   const handleReset = () => {
     setInput("");
@@ -171,24 +194,12 @@ export default function Home() {
         <section id="results-root" className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pt-8 border-t border-slate-900">
           
           {/* Module 8: Clarity Score Header */}
-          <div className="glass rounded-3xl p-8 bg-gradient-to-br from-blue-600/10 to-purple-600/10 border-white/10 flex flex-col md:flex-row items-center gap-8">
-            <div className="relative w-32 h-32 flex-none">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" className="text-slate-800" />
-                <circle 
-                  cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" 
-                  strokeDasharray="283" 
-                  strokeDashoffset={283 - (283 * result.clarityScore) / 100}
-                  strokeLinecap="round"
-                  className="text-blue-500 transition-all duration-1000 ease-out" 
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold">{result.clarityScore}</span>
-                <span className="text-[10px] uppercase font-bold text-slate-500">Clarity</span>
-              </div>
+          <div className="glass rounded-3xl p-8 bg-gradient-to-br from-blue-600/10 to-purple-600/10 border-white/10 flex flex-col md:flex-row items-center gap-8 shadow-2xl relative overflow-hidden group">
+            <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="flex-none">
+              <ClarityGauge score={result.clarityScore} />
             </div>
-            <div className="flex flex-col gap-2 text-center md:text-left">
+            <div className="flex flex-col gap-2 text-center md:text-left relative">
               <h2 className="text-2xl font-bold flex items-center gap-2 justify-center md:justify-start">
                 <Target className="w-6 h-6 text-blue-400" />
                 Your Plan Analysis
@@ -201,9 +212,16 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Goal Card */}
-            <div className="glass rounded-2xl p-6 flex flex-col gap-4 border-l-4 border-l-blue-400 hover:border-l-blue-300 transition-colors">
-              <div className="flex items-center gap-2 text-blue-300 font-semibold uppercase tracking-wider text-xs">
-                <Target className="w-4 h-4" />
+            <div className="glass rounded-2xl p-6 flex flex-col gap-4 border-l-4 border-l-blue-400 hover:border-l-blue-300 transition-all relative group">
+              <button 
+                onClick={() => copyToClipboard(result.goal)}
+                className="absolute top-4 right-4 p-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all text-slate-400 hover:text-white"
+                title="Copy Goal"
+              >
+                <Layers className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-2 text-blue-300 font-semibold uppercase tracking-wider text-[10px]">
+                <Target className="w-3.5 h-3.5" />
                 The Core Goal
               </div>
               <p className="text-xl font-medium text-slate-200 leading-relaxed">
@@ -212,9 +230,16 @@ export default function Home() {
             </div>
 
             {/* Method Card */}
-            <div className="glass rounded-2xl p-6 flex flex-col gap-4 border-l-4 border-l-cyan-400 hover:border-l-cyan-300 transition-colors">
-              <div className="flex items-center gap-2 text-cyan-400 font-semibold uppercase tracking-wider text-xs">
+            <div className="glass rounded-2xl p-6 flex flex-col gap-4 border-l-4 border-l-cyan-400 hover:border-l-cyan-300 transition-all relative group">
+              <button 
+                onClick={() => copyToClipboard(result.method)}
+                className="absolute top-4 right-4 p-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all text-slate-400 hover:text-white"
+                title="Copy Method"
+              >
                 <Layers className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-2 text-cyan-400 font-semibold uppercase tracking-wider text-[10px]">
+                <Layers className="w-3.5 h-3.5" />
                 The Approach
               </div>
               <p className="text-lg text-slate-300 leading-relaxed">
@@ -225,18 +250,31 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Steps List - takes 2 cols on desktop */}
-            <div className="md:col-span-2 glass rounded-2xl p-6 flex flex-col gap-6">
-              <div className="flex items-center gap-2 text-sky-400 font-semibold uppercase tracking-wider text-xs">
-                <ListTodo className="w-4 h-4" />
-                Execution Phases
+            <div className="md:col-span-2 glass rounded-2xl p-8 flex flex-col gap-8 relative group">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sky-400 font-semibold uppercase tracking-wider text-[10px]">
+                  <ListTodo className="w-3.5 h-3.5" />
+                  Execution Roadmap
+                </div>
+                <button 
+                  onClick={() => copyToClipboard(result.steps.join('\n'))}
+                  className="p-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all text-slate-400 hover:text-white"
+                >
+                  <Layers className="w-4 h-4" />
+                </button>
               </div>
-              <div className="flex flex-col gap-4">
+              
+              <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-sky-500/50 before:via-blue-500/40 before:to-transparent">
                 {result.steps.map((step: string, index: number) => (
-                  <div key={index} className="flex gap-4 group">
-                    <div className="flex-none w-8 h-8 rounded-full bg-slate-800/80 border border-sky-500/30 flex items-center justify-center text-sm font-bold text-sky-400 group-hover:border-sky-400 group-hover:bg-sky-500/10 transition-colors">
+                  <div key={index} className="relative flex items-start gap-8 group/step">
+                    <div className="absolute mt-1.5 w-10 h-10 -ml-0.5 rounded-full bg-slate-900 border-2 border-sky-500 flex items-center justify-center text-[10px] font-bold text-sky-400 z-10 shadow-[0_0_10px_rgba(56,189,248,0.4)] group-hover/step:scale-110 transition-transform">
                       {index + 1}
                     </div>
-                    <p className="text-slate-200 py-1">{step}</p>
+                    <div className="pl-14">
+                      <p className="text-slate-200 text-base leading-relaxed group-hover/step:text-white transition-colors">
+                        {step}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -288,8 +326,14 @@ export default function Home() {
                 <span className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Your Original Input</span>
                 <p className="text-sm text-slate-400 italic font-serif">"{input}"</p>
               </div>
-              <div className="glass rounded-2xl p-6 bg-blue-600/10 border-blue-500/30 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-2 bg-blue-500/20 text-blue-300 text-[10px] font-bold uppercase rounded-bl-xl">Clearer Copy</div>
+              <div className="glass rounded-2xl p-6 bg-blue-600/10 border-blue-500/30 relative overflow-hidden group">
+                <button 
+                  onClick={() => copyToClipboard(result.simplifiedVersion)}
+                  className="absolute top-2 right-2 p-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all text-blue-400 hover:text-white"
+                >
+                  <Layers className="w-4 h-4" />
+                </button>
+                <div className="absolute top-0 right-10 p-2 bg-blue-500/20 text-blue-300 text-[10px] font-bold uppercase rounded-bl-xl">Clearer Copy</div>
                 <span className="text-[10px] font-bold text-blue-400/80 uppercase mb-2 block">AI Refined Version</span>
                 <p className="text-base text-slate-100 font-medium">{result.simplifiedVersion}</p>
               </div>
@@ -302,7 +346,17 @@ export default function Home() {
               <CheckCircle2 className="w-4 h-4" />
               Immediate Action Plan
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative group/action">
+              <button 
+                onClick={() => copyToClipboard(result.actionableSteps.join('\n'))}
+                className="absolute -top-10 right-0 p-2 rounded-lg bg-white/5 opacity-0 group-hover/action:opacity-100 hover:bg-white/10 transition-all text-cyan-400 hover:text-white z-20"
+                title="Copy Action Plan"
+              >
+                <div className="flex items-center gap-2 text-[10px] font-bold">
+                  <Layers className="w-3.5 h-3.5" />
+                  COPY ALL
+                </div>
+              </button>
               {result.actionableSteps.map((task: string, index: number) => (
                 <div key={index} className="glass rounded-xl p-4 flex items-start gap-3 hover:bg-cyan-500/10 transition-colors border-l-2 border-l-cyan-500/50">
                   <div className="mt-1 flex-none w-5 h-5 rounded border border-cyan-500/50 flex items-center justify-center text-[10px] font-bold text-cyan-400 bg-cyan-500/10">
@@ -316,13 +370,11 @@ export default function Home() {
         </section>
       )}
 
-      {/* Loading Placeholders */}
-      {isGenerating && (
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
-          <div className="h-40 glass rounded-2xl border-slate-800" />
-          <div className="h-40 glass rounded-2xl border-slate-800" />
-        </section>
-      )}
+      {/* Copy Success Toast */}
+      <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] glass rounded-full px-6 py-3 bg-blue-600 border-blue-400 shadow-2xl shadow-blue-500/50 text-white text-sm font-bold flex items-center gap-3 transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}>
+        <CheckCircle2 className="w-4 h-4" />
+        Copied to clipboard!
+      </div>
     </main>
   );
 }
