@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -9,8 +9,10 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
   const [showToast, setShowToast] = useState(false);
+
 
   useEffect(() => {
     setMounted(true);
@@ -88,6 +90,7 @@ export default function Home() {
   const handleReset = () => {
     setInput("");
     setResult(null);
+    setCompletedSteps([]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -302,16 +305,22 @@ export default function Home() {
               Missing Elements Detection
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(result.missingElements).map(([key, value]: [string, any]) => (
-                <div key={key} className="glass rounded-xl p-4 flex flex-col gap-2 border-t-2 border-t-blue-500/50 hover:border-t-blue-400 transition-colors bg-blue-900/10">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">
-                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                  </span>
-                  <p className="text-sm text-slate-200 leading-snug">
-                    {String(value)}
-                  </p>
-                </div>
-              ))}
+              {Object.entries(result.missingElements).map(([key, value]: [string, any], index: number) => {
+                const CategoryIcon = [Target, ListTodo, Briefcase, Calendar][index % 4] || AlertCircle;
+                return (
+                  <div key={key} className="glass rounded-xl p-4 flex flex-col gap-3 border-t-2 border-t-blue-500/50 hover:border-l-2 hover:border-l-blue-400 transition-all bg-blue-900/10 hover:bg-blue-900/20 group/element shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </span>
+                      <CategoryIcon className="w-3.5 h-3.5 text-blue-400/50 group-hover/element:text-blue-400 transition-colors" />
+                    </div>
+                    <p className="text-sm text-slate-200 leading-snug">
+                      {String(value)}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -357,14 +366,46 @@ export default function Home() {
                   COPY ALL
                 </div>
               </button>
-              {result.actionableSteps.map((task: string, index: number) => (
-                <div key={index} className="glass rounded-xl p-4 flex items-start gap-3 hover:bg-cyan-500/10 transition-colors border-l-2 border-l-cyan-500/50">
-                  <div className="mt-1 flex-none w-5 h-5 rounded border border-cyan-500/50 flex items-center justify-center text-[10px] font-bold text-cyan-400 bg-cyan-500/10">
-                    {index + 1}
-                  </div>
-                  <p className="text-sm text-slate-200 font-medium">{task}</p>
-                </div>
-              ))}
+              {result.actionableSteps.map((task: string, index: number) => {
+                const isCompleted = completedSteps.includes(index);
+                const StepIcon = [Search, Briefcase, Map, Zap][index % 4] || CheckCircle2;
+                
+                return (
+                  <button 
+                    key={index} 
+                    onClick={() => {
+                      setCompletedSteps(prev => 
+                        prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+                      );
+                    }}
+                    className={`glass rounded-xl p-4 flex items-start gap-4 transition-all duration-500 border-l-2 text-left group/item ${
+                      isCompleted 
+                        ? 'opacity-50 grayscale border-l-slate-600 bg-slate-900/50' 
+                        : 'hover:bg-cyan-500/10 border-l-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10'
+                    }`}
+                  >
+                    <div className={`mt-0.5 flex-none w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-500 ${
+                      isCompleted 
+                        ? 'bg-slate-800 text-slate-500' 
+                        : 'bg-cyan-500/20 text-cyan-400 group-hover/item:scale-110 group-hover/item:bg-cyan-500/30'
+                    }`}>
+                      {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                        isCompleted ? 'text-slate-600' : 'text-cyan-500/60'
+                      }`}>
+                        Step {index + 1}
+                      </span>
+                      <p className={`text-sm font-medium transition-all ${
+                        isCompleted ? 'text-slate-500 line-through' : 'text-slate-200'
+                      }`}>
+                        {task}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
