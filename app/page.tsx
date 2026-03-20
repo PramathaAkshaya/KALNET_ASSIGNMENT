@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -408,7 +408,68 @@ export default function Home() {
               })}
             </div>
           </div>
+
+          {/* Ultimate Feature 1: Smart Toolkit */}
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-2 text-blue-300 font-semibold uppercase tracking-wider text-[10px] px-2">
+              <Wrench className="w-3.5 h-3.5" />
+              Strategic Resource Toolkit
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {result.toolkit?.map((tool: any, idx: number) => (
+                <div key={idx} className="glass rounded-xl p-5 border border-blue-500/10 hover:border-blue-500/30 transition-all bg-gradient-to-b from-blue-500/5 to-transparent flex flex-col gap-3 group/tool">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-white group-hover/tool:text-blue-400 transition-colors uppercase tracking-tight">{tool.name}</span>
+                    <Cpu className="w-3.5 h-3.5 text-blue-500/30" />
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-1">{tool.useCase}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ultimate Feature 2: The Devil's Advocate */}
+          <div className="glass rounded-3xl p-8 border-l-8 border-l-red-500/50 bg-gradient-to-r from-red-500/5 to-transparent flex flex-col gap-6 relative overflow-hidden group/risk">
+            <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-4 -translate-y-4 group-hover/risk:opacity-10 transition-opacity">
+              <ShieldAlert className="w-48 h-48 text-red-500" />
+            </div>
+            <div className="flex items-center gap-2 text-red-400 font-bold uppercase tracking-widest text-xs">
+              <ShieldAlert className="w-4 h-4" />
+              The Devil's Advocate (Risk Matrix)
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+              {result.critique?.map((risk: string, idx: number) => (
+                <div key={idx} className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-red-300/80 font-bold text-[10px]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    RISK {idx + 1}
+                  </div>
+                  <p className="text-sm text-slate-300 leading-relaxed italic border-l border-red-500/20 pl-4">
+                    "{risk}"
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ultimate Feature 3: Crisis Simulations */}
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-2 text-orange-400 font-semibold uppercase tracking-wider text-[10px] px-2">
+              <Thermometer className="w-3.5 h-3.5" />
+              Contingency Stress Tests
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
+              {result.simulations?.map((sim: any, idx: number) => (
+                <div key={idx} className="glass rounded-2xl p-6 border-slate-800 hover:border-orange-500/30 transition-all bg-slate-900/40 relative group/sim">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-orange-500/30 group-hover/sim:bg-orange-500 transition-colors" />
+                  <span className="text-[10px] font-bold text-orange-500/80 uppercase mb-2 block">{sim.scenario}</span>
+                  <p className="text-slate-200 font-medium">{sim.adjustment}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
+
       )}
 
       {/* Copy Success Toast */}

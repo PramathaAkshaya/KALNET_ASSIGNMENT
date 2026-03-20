@@ -13,30 +13,40 @@ export async function POST(req: Request) {
     const model = genAI.getGenerativeModel({ model: "gemma-3-1b-it" });
 
     const prompt = `
-      You are an expert project planner and clarity consultant. 
-      The user has provided a raw, potentially vague idea or plan: "${idea}"
-
-      Your task is to analyze this input and return a precisely structured JSON response with the following fields:
-
-      1. "goal": A clear, single-sentence definition of the main objective.
-      2. "method": A brief explanation of the proposed approach or strategy.
-      3. "steps": An array of sequential, high-level phases to achieve the goal.
-      4. "timeline": A string describing the estimated duration or "Missing" if not identifiable.
-      5. "missingElements": An object with categories:
-         - "goalClarity": Analysis of how specific the goal is.
-         - "executionSteps": Are the steps logical and complete?
-         - "resources": What tools/skills/people are missing but needed?
-         - "timeline": Is there a realistic time estimate?
-      6. "simplifiedVersion": A concise (max 2 sentences) and clearer version of the original input.
-      7. "actionableSteps": An array of 3-5 immediate, practical next steps the user should take.
-      8. "clarityScore": A number from 0 to 100 representing how well-defined the plan is.
-      9. "scoreExplanation": A brief sentence explaining why this score was given.
-
-      Constraints:
-      - Return ONLY the JSON object.
-      - Ensure all fields are present.
-      - Be encouraging but realistic.
+      You are an elite strategic planner and risk analyst. 
+      Analyze this idea: "${idea}"
+      
+      Return a STRICT JSON object with these EXACT keys:
+      {
+        "goal": "one crystal clear sentence",
+        "method": "brief summary of the core approach",
+        "steps": ["array of 5-8 concrete execution steps"],
+        "timeline": "estimated total duration",
+        "missingElements": {
+          "goalClarity": "brief assessment",
+          "executionSteps": "brief assessment",
+          "resources": "brief assessment",
+          "timeline": "brief assessment"
+        },
+        "simplifiedVersion": "a 1-sentence version a 5-year old could understand",
+        "actionableSteps": ["array of 4 immediate, easy-to-start next steps"],
+        "clarityScore": number (0-100),
+        "scoreExplanation": "brief explanation of why the score is what it is",
+        "critique": ["3 potential risks, blind spots, or reasons for failure as a 'Devil's Advocate'"],
+        "toolkit": [
+          {"name": "Tool Name", "useCase": "What to use it for in this specific plan"},
+          {"name": "Tool Name", "useCase": "What to use it for in this specific plan"},
+          {"name": "Tool Name", "useCase": "What to use it for in this specific plan"}
+        ],
+        "simulations": [
+          {"scenario": "Half Budget Crisis", "adjustment": "1-sentence on how the plan changes"},
+          {"scenario": "Half Time Crisis (Double Speed)", "adjustment": "1-sentence on how the plan changes"}
+        ]
+      }
+      
+      Respond only with the JSON object. No extra text or markdown.
     `;
+
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
