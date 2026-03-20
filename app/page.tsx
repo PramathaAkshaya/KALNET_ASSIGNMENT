@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb, History, Trash2, Clock } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb, History, Trash2, Clock, FileDown } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -310,6 +310,17 @@ export default function Home() {
       {result && !isGenerating && (
         <section id="results-root" className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pt-8 border-t border-slate-900">
           
+          {/* PDF Download Button */}
+          <div className="flex justify-end print-hide">
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-sm transition-all shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 active:scale-95"
+            >
+              <FileDown className="w-4 h-4" />
+              Download as PDF
+            </button>
+          </div>
+
           {/* Module 8: Clarity Score Header */}
           <div className="glass rounded-3xl p-8 bg-gradient-to-br from-blue-600/10 to-purple-600/10 border-white/10 flex flex-col md:flex-row items-center gap-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -664,9 +675,82 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-
       )}
+
+      {/* Hidden PDF Export Area - rendered only on print */}
+      {result && (
+        <div id="pdf-export-area" style={{display: 'none'}}>
+          <div className="pdf-header">
+            <div>
+              <h1 style={{fontSize: '22px', fontWeight: 900, color: '#1e293b', marginBottom: '4px'}}>Explain My Plan — Strategic Report</h1>
+              <p style={{fontSize: '11px', color: '#64748b'}}>AI-Generated Strategic Plan</p>
+              <p style={{fontSize: '10px', color: '#94a3b8', marginTop: '4px'}}>Generated: {new Date().toLocaleString()}</p>
+            </div>
+            <div className="pdf-score-badge">{result.clarityScore}</div>
+          </div>
+
+          <div className="pdf-section-title">Core Goal</div>
+          <div className="pdf-card"><p style={{fontWeight: 600, color: '#1e293b'}}>{result.goal}</p></div>
+
+          <div className="pdf-section-title">Approach & Method</div>
+          <div className="pdf-card"><p style={{color: '#334155'}}>{result.method}</p></div>
+
+          <div className="pdf-section-title">Execution Roadmap</div>
+          <div className="pdf-card">
+            {result.steps?.map((step: string, i: number) => (
+              <p key={i} style={{marginBottom: '10px', paddingLeft: '14px', borderLeft: '3px solid #2563eb', fontSize: '12px', color: '#334155'}}>
+                <strong style={{color: '#2563eb'}}>Step {i+1}: </strong>{step}
+              </p>
+            ))}
+          </div>
+
+          <div className="pdf-grid-2">
+            <div>
+              <div className="pdf-section-title">Timeline</div>
+              <div className="pdf-card"><p style={{fontWeight: 700, color: '#1e293b', fontSize: '16px'}}>{result.timeline}</p></div>
+            </div>
+            <div>
+              <div className="pdf-section-title">AI Refined Summary</div>
+              <div className="pdf-card"><p style={{color: '#334155', fontStyle: 'italic'}}>{result.simplifiedVersion}</p></div>
+            </div>
+          </div>
+
+          <div className="page-break" />
+
+          <div className="pdf-section-title" style={{marginTop: '24px'}}>Risk Matrix (Devil's Advocate)</div>
+          {result.critique?.map((risk: string, i: number) => (
+            <div key={i} className="pdf-risk-section">
+              <p style={{fontSize: '9px', fontWeight: 700, color: '#ef4444', marginBottom: '2px'}}>⚠ RISK {i+1}</p>
+              <p style={{fontSize: '11px', color: '#334155', fontStyle: 'italic'}}>"{risk}"</p>
+            </div>
+          ))}
+
+          <div className="pdf-section-title" style={{marginTop: '16px'}}>Strategic Toolkit</div>
+          <div className="pdf-grid-3">
+            {result.toolkit?.map((tool: any, i: number) => (
+              <div key={i} className="pdf-card">
+                <p style={{fontWeight: 700, fontSize: '11px', color: '#2563eb', marginBottom: '4px'}}>{tool.name}</p>
+                <p style={{fontSize: '10px', color: '#64748b'}}>{tool.useCase}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="pdf-section-title" style={{marginTop: '16px'}}>Immediate Action Plan</div>
+          <div className="pdf-grid-2">
+            {result.actionableSteps?.map((step: string, i: number) => (
+              <div key={i} className="pdf-card" style={{display: 'flex', gap: '10px', alignItems: 'flex-start'}}>
+                <span style={{background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, flexShrink: 0}}>{i+1}</span>
+                <p style={{fontSize: '11px', color: '#334155'}}>{step}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{borderTop: '2px solid #e2e8f0', marginTop: '24px', paddingTop: '12px', fontSize: '9px', color: '#94a3b8', textAlign: 'center' as const}}>
+            Generated by <strong>Explain My Plan</strong> &bull; AI-Powered Strategic Planning Tool &bull; Clarity Score: {result.clarityScore}/100
+          </div>
+        </div>
+      )}
+
 
       {/* Copy Success Toast */}
       <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] glass rounded-full px-6 py-3 bg-blue-600 border-blue-400 shadow-2xl shadow-blue-500/50 text-white text-sm font-bold flex items-center gap-3 transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}>
