@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Info } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -468,67 +468,94 @@ export default function Home() {
               ))}
             </div>
           </div>
-          {/* Discovery Engine Feature */}
-          <div className="flex flex-col gap-6 scroll-mt-24 pb-8">
-            <div className="flex items-center gap-2 text-indigo-400 font-semibold uppercase tracking-wider text-[10px] px-2">
-              <Globe className="w-3.5 h-3.5" />
-              AI Discovery & Research Center
+
+          {/* Ultimate Feature 4: Reference Center */}
+          <div className="flex flex-col gap-8 pb-12 border-t border-slate-900 pt-12">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-400" />
+                Strategic Reference Center
+              </h3>
+              <p className="text-sm text-slate-400">Curated resources and research data to support your execution.</p>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Category 1: Related Sites */}
-              <div className="glass rounded-2xl p-6 border-indigo-500/10 hover:border-indigo-500/30 transition-all bg-indigo-500/5 group/disco">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                    <Globe className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Related Platforms</span>
+              {/* Category 1: Related Links */}
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-blue-300 font-bold uppercase tracking-widest text-[10px]">
+                  <Globe className="w-3 h-3" />
+                  Related Links
                 </div>
-                <div className="flex flex-col gap-2">
-                  {result.discovery?.relatedLinks?.map((link: string, i: number) => (
-                    <div key={i} className="text-sm text-slate-300 flex items-center gap-2 py-1 border-b border-indigo-500/5 last:border-0 group/link">
-                      <div className="w-1 h-1 rounded-full bg-indigo-500/40 group-hover/link:bg-indigo-400 transition-colors" />
-                      {link}
-                    </div>
+                <div className="space-y-2">
+                  {result.references?.relatedLinks?.map((link: any, idx: number) => (
+                    <a
+                      key={idx}
+                      href={typeof link === 'string' ? link : link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="glass rounded-lg p-3 text-xs text-slate-300 border-slate-800 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all flex items-center gap-2 group"
+                    >
+                      <Globe className="w-3 h-3 text-blue-500/40 group-hover:text-blue-400 flex-none" />
+                      <span className="group-hover:text-blue-400 transition-colors truncate">
+                        {typeof link === 'string' ? link : link.title}
+                      </span>
+                      <span className="ml-auto text-slate-600 group-hover:text-blue-400 flex-none">↗</span>
+                    </a>
                   ))}
                 </div>
               </div>
 
-              {/* Category 2: Costing */}
-              <div className="glass rounded-2xl p-6 border-emerald-500/10 hover:border-emerald-500/30 transition-all bg-emerald-500/5 group/disco">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                    <DollarSign className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Costing Resources</span>
+              {/* Category 2: Pricing & Costs */}
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-green-400 font-bold uppercase tracking-widest text-[10px]">
+                  <DollarSign className="w-3 h-3" />
+                  Pricing & Budgeting
                 </div>
-                <div className="flex flex-col gap-2">
-                  {result.discovery?.costingResources?.map((link: string, i: number) => (
-                    <div key={i} className="text-sm text-slate-300 flex items-center gap-2 py-1 border-b border-emerald-500/5 last:border-0 group/link">
-                      <div className="w-1 h-1 rounded-full bg-emerald-500/40 group-hover/link:bg-emerald-400 transition-colors" />
-                      {link}
-                    </div>
+                <div className="space-y-2">
+                  {result.references?.costsAndBudgets?.map((cost: any, idx: number) => (
+                    <a
+                      key={idx}
+                      href={typeof cost === 'string' ? '#' : cost.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="glass rounded-lg p-3 text-xs text-slate-300 border-slate-800 hover:border-green-500/40 hover:bg-green-500/5 transition-all flex items-center gap-2 group"
+                    >
+                      <DollarSign className="w-3 h-3 text-green-500/40 group-hover:text-green-400 flex-none" />
+                      <span className="group-hover:text-green-400 transition-colors truncate">
+                        {typeof cost === 'string' ? cost : cost.title}
+                      </span>
+                      <span className="ml-auto text-slate-600 group-hover:text-green-400 flex-none">↗</span>
+                    </a>
                   ))}
                 </div>
               </div>
 
-              {/* Category 3: Facts */}
-              <div className="glass rounded-2xl p-6 border-slate-500/10 hover:border-slate-500/30 transition-all bg-slate-500/5 group/disco">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-slate-500/20 flex items-center justify-center text-slate-400">
-                    <Info className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Facts & Industry News</span>
+              {/* Category 3: Facts & Trends */}
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-yellow-400 font-bold uppercase tracking-widest text-[10px]">
+                  <Lightbulb className="w-3 h-3" />
+                  Facts & Trends
                 </div>
-                <div className="flex flex-col gap-2">
-                  {result.discovery?.factsAndNews?.map((link: string, i: number) => (
-                    <div key={i} className="text-sm text-slate-300 flex items-center gap-2 py-1 border-b border-slate-500/5 last:border-0 group/link">
-                      <div className="w-1 h-1 rounded-full bg-slate-500/40 group-hover/link:bg-slate-400 transition-colors" />
-                      {link}
-                    </div>
+                <div className="space-y-2">
+                  {result.references?.funFacts?.map((fact: any, idx: number) => (
+                    <a
+                      key={idx}
+                      href={typeof fact === 'string' ? '#' : fact.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="glass rounded-lg p-3 text-xs text-slate-300 border-slate-800 hover:border-yellow-500/40 hover:bg-yellow-500/5 transition-all flex items-center gap-2 group"
+                    >
+                      <Lightbulb className="w-3 h-3 text-yellow-500/40 group-hover:text-yellow-400 flex-none" />
+                      <span className="group-hover:text-yellow-400 transition-colors truncate">
+                        {typeof fact === 'string' ? fact : fact.title}
+                      </span>
+                      <span className="ml-auto text-slate-600 group-hover:text-yellow-400 flex-none">↗</span>
+                    </a>
                   ))}
                 </div>
               </div>
             </div>
+
           </div>
         </section>
 

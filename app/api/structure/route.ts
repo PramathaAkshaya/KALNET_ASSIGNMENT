@@ -42,10 +42,16 @@ export async function POST(req: Request) {
           {"scenario": "Half Budget Crisis", "adjustment": "1-sentence on how the plan changes"},
           {"scenario": "Half Time Crisis (Double Speed)", "adjustment": "1-sentence on how the plan changes"}
         ],
-        "discovery": {
-          "relatedLinks": ["2-3 names of related websites/competitors for this topic"],
-          "costingResources": ["2 names of sites for pricing, budgeting, or cost calculation for this topic"],
-          "factsAndNews": ["2-3 names of sites for industry facts, news, or deep-dives for this topic"]
+        "references": {
+          "relatedLinks": [
+            {"title": "descriptive site name", "url": "https://real-url.com"}
+          ],
+          "costsAndBudgets": [
+            {"title": "descriptive site name", "url": "https://real-url.com"}
+          ],
+          "funFacts": [
+            {"title": "fact or trend headline", "url": "https://real-source-url.com"}
+          ]
         }
       }
       
