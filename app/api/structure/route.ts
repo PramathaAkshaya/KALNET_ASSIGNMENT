@@ -41,11 +41,17 @@ export async function POST(req: Request) {
         "simulations": [
           {"scenario": "Half Budget Crisis", "adjustment": "1-sentence on how the plan changes"},
           {"scenario": "Half Time Crisis (Double Speed)", "adjustment": "1-sentence on how the plan changes"}
-        ]
+        ],
+        "discovery": {
+          "relatedLinks": ["2-3 names of related websites/competitors for this topic"],
+          "costingResources": ["2 names of sites for pricing, budgeting, or cost calculation for this topic"],
+          "factsAndNews": ["2-3 names of sites for industry facts, news, or deep-dives for this topic"]
+        }
       }
       
       Respond only with the JSON object. No extra text or markdown.
     `;
+
 
 
     const result = await model.generateContent(prompt);

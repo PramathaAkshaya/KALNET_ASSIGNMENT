@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Info } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -468,7 +468,70 @@ export default function Home() {
               ))}
             </div>
           </div>
+          {/* Discovery Engine Feature */}
+          <div className="flex flex-col gap-6 scroll-mt-24 pb-8">
+            <div className="flex items-center gap-2 text-indigo-400 font-semibold uppercase tracking-wider text-[10px] px-2">
+              <Globe className="w-3.5 h-3.5" />
+              AI Discovery & Research Center
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Category 1: Related Sites */}
+              <div className="glass rounded-2xl p-6 border-indigo-500/10 hover:border-indigo-500/30 transition-all bg-indigo-500/5 group/disco">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <Globe className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Related Platforms</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {result.discovery?.relatedLinks?.map((link: string, i: number) => (
+                    <div key={i} className="text-sm text-slate-300 flex items-center gap-2 py-1 border-b border-indigo-500/5 last:border-0 group/link">
+                      <div className="w-1 h-1 rounded-full bg-indigo-500/40 group-hover/link:bg-indigo-400 transition-colors" />
+                      {link}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category 2: Costing */}
+              <div className="glass rounded-2xl p-6 border-emerald-500/10 hover:border-emerald-500/30 transition-all bg-emerald-500/5 group/disco">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Costing Resources</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {result.discovery?.costingResources?.map((link: string, i: number) => (
+                    <div key={i} className="text-sm text-slate-300 flex items-center gap-2 py-1 border-b border-emerald-500/5 last:border-0 group/link">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500/40 group-hover/link:bg-emerald-400 transition-colors" />
+                      {link}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category 3: Facts */}
+              <div className="glass rounded-2xl p-6 border-slate-500/10 hover:border-slate-500/30 transition-all bg-slate-500/5 group/disco">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-slate-500/20 flex items-center justify-center text-slate-400">
+                    <Info className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Facts & Industry News</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {result.discovery?.factsAndNews?.map((link: string, i: number) => (
+                    <div key={i} className="text-sm text-slate-300 flex items-center gap-2 py-1 border-b border-slate-500/5 last:border-0 group/link">
+                      <div className="w-1 h-1 rounded-full bg-slate-500/40 group-hover/link:bg-slate-400 transition-colors" />
+                      {link}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
+
 
       )}
 
