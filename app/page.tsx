@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb, History, Trash2, Clock } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -10,13 +10,59 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-
   const [showToast, setShowToast] = useState(false);
-
+  const [showHistory, setShowHistory] = useState(false);
+  const [planHistory, setPlanHistory] = useState<{id: string; input: string; goal: string; score: number; date: string; data: any}[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    // Load plan history from localStorage on mount
+    try {
+      const saved = localStorage.getItem("explainMyPlan_history");
+      if (saved) setPlanHistory(JSON.parse(saved));
+    } catch (e) {}
   }, []);
+
+  const saveToHistory = (inputText: string, planData: any) => {
+    const entry = {
+      id: Date.now().toString(),
+      input: inputText,
+      goal: planData.goal || "Untitled Plan",
+      score: planData.clarityScore || 0,
+      date: new Date().toLocaleString(),
+      data: planData,
+    };
+    setPlanHistory(prev => {
+      const updated = [entry, ...prev].slice(0, 10); // keep last 10 plans
+      localStorage.setItem("explainMyPlan_history", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const loadFromHistory = (entry: any) => {
+    setInput(entry.input);
+    setResult(entry.data);
+    setCompletedSteps([]);
+    setShowHistory(false);
+    setTimeout(() => {
+      document.getElementById("results-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 200);
+  };
+
+  const deleteFromHistory = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPlanHistory(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      localStorage.setItem("explainMyPlan_history", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const clearAllHistory = () => {
+    setPlanHistory([]);
+    localStorage.removeItem("explainMyPlan_history");
+  };
+
 
   const handleGenerate = async () => {
     if (isGenerating || !input.trim()) return;
@@ -41,6 +87,7 @@ export default function Home() {
       
       setResult(data);
       setIsGenerating(false);
+      saveToHistory(input, data);
       setTimeout(() => {
         document.getElementById("results-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 500);
@@ -99,20 +146,86 @@ export default function Home() {
       {/* Sticky Header with Reset */}
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
         <div className="glass rounded-full px-6 py-3 flex items-center justify-between shadow-xl border-white/5 bg-slate-950/50">
-          <div className="flex items-center gap-2 font-bold text-sm tracking-tight">
+        <div className="flex items-center gap-2 font-bold text-sm tracking-tight">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Explain My Plan
           </div>
-          {result && (
-            <button 
-              onClick={handleReset}
-              className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowHistory(h => !h)}
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors"
             >
-              Start Over
+              <History className="w-3.5 h-3.5" />
+              <span>{planHistory.length > 0 ? planHistory.length : ''} History</span>
             </button>
-          )}
+            {result && (
+              <button 
+                onClick={handleReset}
+                className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+              >
+                Start Over
+              </button>
+            )}
+          </div>
         </div>
       </nav>
+
+      {/* History Slide-Over Panel */}
+      {showHistory && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={() => setShowHistory(false)} />
+          {/* Panel */}
+          <div className="relative ml-auto h-full w-full max-w-sm bg-slate-950 border-l border-slate-800 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
+            <div className="flex items-center justify-between p-5 border-b border-slate-800">
+              <div className="flex items-center gap-2 font-bold text-white">
+                <History className="w-4 h-4 text-blue-400" />
+                Plan History
+                <span className="text-xs font-normal text-slate-500 ml-1">(localStorage)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {planHistory.length > 0 && (
+                  <button onClick={clearAllHistory} className="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-400 px-2 py-1 rounded-full transition-colors font-bold">
+                    CLEAR ALL
+                  </button>
+                )}
+                <button onClick={() => setShowHistory(false)} className="text-slate-500 hover:text-white transition-colors">&times;</button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+              {planHistory.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40">
+                  <Clock className="w-10 h-10 text-slate-600" />
+                  <p className="text-slate-500 text-sm text-center">No saved plans yet. Generate a plan to see it here!</p>
+                </div>
+              ) : (
+                planHistory.map((entry) => (
+                  <button
+                    key={entry.id}
+                    onClick={() => loadFromHistory(entry)}
+                    className="text-left glass rounded-xl p-4 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group border-slate-800 flex flex-col gap-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-semibold text-slate-200 leading-snug line-clamp-2 group-hover:text-white transition-colors">{entry.goal}</p>
+                      <button
+                        onClick={(e) => deleteFromHistory(entry.id, e)}
+                        className="flex-none text-slate-600 hover:text-red-400 transition-colors p-0.5"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-600">{entry.date}</span>
+                      <span className="text-[10px] font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">Score: {entry.score}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-600 italic truncate">"{entry.input}"</p>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Generating Overlay */}
       {isGenerating && (
@@ -127,6 +240,7 @@ export default function Home() {
           </div>
         </div>
       )}
+
 
       {/* Hero Section */}
       <header className="flex flex-col gap-4 text-center mt-8">
