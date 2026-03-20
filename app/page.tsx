@@ -1,25 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers } from "lucide-react";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
+  useEffect(() => {
+    setMounted(true);
+    console.log("React Hydration Complete. Site is interactive.");
+  }, []);
+
+
   const handleGenerate = async () => {
-    if (!input.trim()) return;
+    if (isGenerating) {
+      window.alert("Please wait, the AI is already working!");
+      return;
+    }
+    if (!input.trim()) {
+      window.alert("Please type your idea in the text area above before clicking!");
+      return;
+    }
+    window.alert("SUCCESS: Click registered! Sending your idea to the AI now...");
+    
     setIsGenerating(true);
     setResult(null);
     setErrorMsg("");
     try {
+      console.log("Fetching /api/structure...");
       const res = await fetch("/api/structure", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idea: input }),
       });
+      console.log("Response received. Status:", res.status);
       const data = await res.json();
+      console.log("Data parsed:", data);
       
       if (!res.ok || data.error) {
         setErrorMsg(data.error || "Failed to generate plan.");
@@ -29,8 +49,11 @@ export default function Home() {
       setResult(data);
       // Wait for state to update then scroll to results
       setTimeout(() => {
-        document.getElementById("results-root")?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+        const root = document.getElementById("results-root");
+        if (root) {
+          root.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 500);
     } catch (error: any) {
       console.error(error);
       setErrorMsg(error.message || "An unexpected error occurred.");
@@ -65,6 +88,20 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* Generating Overlay */}
+      {isGenerating && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center gap-6 animate-in fade-in duration-300">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+            <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-blue-400 animate-pulse" />
+          </div>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h2 className="text-2xl font-bold text-white tracking-tight">AI is crafting your plan...</h2>
+            <p className="text-blue-300/70 text-sm animate-pulse">This usually takes 5-10 seconds</p>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <header className="flex flex-col gap-4 text-center mt-8">
         <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-sm font-medium w-fit mx-auto shadow-[0_0_15px_rgba(59,130,246,0.3)]">
@@ -98,8 +135,7 @@ export default function Home() {
         </div>
         <button
           onClick={handleGenerate}
-          disabled={isGenerating || !input.trim()}
-          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/40 hover:shadow-blue-500/60 blue-glow group"
+          className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/40 hover:shadow-blue-500/60 blue-glow group w-full cursor-pointer active:scale-95"
         >
           {isGenerating ? (
             <>
