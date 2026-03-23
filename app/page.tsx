@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb, History, Trash2, Clock, FileDown } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -10,59 +10,13 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+
   const [showToast, setShowToast] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [planHistory, setPlanHistory] = useState<{id: string; input: string; goal: string; score: number; date: string; data: any}[]>([]);
+
 
   useEffect(() => {
     setMounted(true);
-    // Load plan history from localStorage on mount
-    try {
-      const saved = localStorage.getItem("explainMyPlan_history");
-      if (saved) setPlanHistory(JSON.parse(saved));
-    } catch (e) {}
   }, []);
-
-  const saveToHistory = (inputText: string, planData: any) => {
-    const entry = {
-      id: Date.now().toString(),
-      input: inputText,
-      goal: planData.goal || "Untitled Plan",
-      score: planData.clarityScore || 0,
-      date: new Date().toLocaleString(),
-      data: planData,
-    };
-    setPlanHistory(prev => {
-      const updated = [entry, ...prev].slice(0, 10); // keep last 10 plans
-      localStorage.setItem("explainMyPlan_history", JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const loadFromHistory = (entry: any) => {
-    setInput(entry.input);
-    setResult(entry.data);
-    setCompletedSteps([]);
-    setShowHistory(false);
-    setTimeout(() => {
-      document.getElementById("results-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 200);
-  };
-
-  const deleteFromHistory = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPlanHistory(prev => {
-      const updated = prev.filter(p => p.id !== id);
-      localStorage.setItem("explainMyPlan_history", JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const clearAllHistory = () => {
-    setPlanHistory([]);
-    localStorage.removeItem("explainMyPlan_history");
-  };
-
 
   const handleGenerate = async () => {
     if (isGenerating || !input.trim()) return;
@@ -87,7 +41,6 @@ export default function Home() {
       
       setResult(data);
       setIsGenerating(false);
-      saveToHistory(input, data);
       setTimeout(() => {
         document.getElementById("results-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 500);
@@ -146,86 +99,20 @@ export default function Home() {
       {/* Sticky Header with Reset */}
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
         <div className="glass rounded-full px-6 py-3 flex items-center justify-between shadow-xl border-white/5 bg-slate-950/50">
-        <div className="flex items-center gap-2 font-bold text-sm tracking-tight">
+          <div className="flex items-center gap-2 font-bold text-sm tracking-tight">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Explain My Plan
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowHistory(h => !h)}
-              className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors"
+          {result && (
+            <button 
+              onClick={handleReset}
+              className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
             >
-              <History className="w-3.5 h-3.5" />
-              <span>{planHistory.length > 0 ? planHistory.length : ''} History</span>
+              Start Over
             </button>
-            {result && (
-              <button 
-                onClick={handleReset}
-                className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
-              >
-                Start Over
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </nav>
-
-      {/* History Slide-Over Panel */}
-      {showHistory && (
-        <div className="fixed inset-0 z-50 flex">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={() => setShowHistory(false)} />
-          {/* Panel */}
-          <div className="relative ml-auto h-full w-full max-w-sm bg-slate-950 border-l border-slate-800 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
-            <div className="flex items-center justify-between p-5 border-b border-slate-800">
-              <div className="flex items-center gap-2 font-bold text-white">
-                <History className="w-4 h-4 text-blue-400" />
-                Plan History
-                <span className="text-xs font-normal text-slate-500 ml-1">(localStorage)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {planHistory.length > 0 && (
-                  <button onClick={clearAllHistory} className="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-400 px-2 py-1 rounded-full transition-colors font-bold">
-                    CLEAR ALL
-                  </button>
-                )}
-                <button onClick={() => setShowHistory(false)} className="text-slate-500 hover:text-white transition-colors">&times;</button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-              {planHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40">
-                  <Clock className="w-10 h-10 text-slate-600" />
-                  <p className="text-slate-500 text-sm text-center">No saved plans yet. Generate a plan to see it here!</p>
-                </div>
-              ) : (
-                planHistory.map((entry) => (
-                  <button
-                    key={entry.id}
-                    onClick={() => loadFromHistory(entry)}
-                    className="text-left glass rounded-xl p-4 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group border-slate-800 flex flex-col gap-2"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-semibold text-slate-200 leading-snug line-clamp-2 group-hover:text-white transition-colors">{entry.goal}</p>
-                      <button
-                        onClick={(e) => deleteFromHistory(entry.id, e)}
-                        className="flex-none text-slate-600 hover:text-red-400 transition-colors p-0.5"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-600">{entry.date}</span>
-                      <span className="text-[10px] font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">Score: {entry.score}</span>
-                    </div>
-                    <p className="text-[10px] text-slate-600 italic truncate">"{entry.input}"</p>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Generating Overlay */}
       {isGenerating && (
@@ -240,7 +127,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
 
       {/* Hero Section */}
       <header className="flex flex-col gap-4 text-center mt-8">
@@ -310,17 +196,6 @@ export default function Home() {
       {result && !isGenerating && (
         <section id="results-root" className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pt-8 border-t border-slate-900">
           
-          {/* PDF Download Button */}
-          <div className="flex justify-end print-hide">
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-sm transition-all shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 active:scale-95"
-            >
-              <FileDown className="w-4 h-4" />
-              Download as PDF
-            </button>
-          </div>
-
           {/* Module 8: Clarity Score Header */}
           <div className="glass rounded-3xl p-8 bg-gradient-to-br from-blue-600/10 to-purple-600/10 border-white/10 flex flex-col md:flex-row items-center gap-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -376,9 +251,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Steps List - takes 2 cols on desktop */}
-            <div className="md:col-span-2 glass rounded-2xl p-8 flex flex-col gap-8 relative group">
+          <div className="flex flex-col gap-6">
+            {/* Steps List - Full Width */}
+            <div className="glass rounded-2xl p-8 flex flex-col gap-8 relative group">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sky-400 font-semibold uppercase tracking-wider text-[10px]">
                   <ListTodo className="w-3.5 h-3.5" />
@@ -406,20 +281,6 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Timeline Card */}
-            <div className="glass rounded-2xl p-6 flex flex-col gap-4 bg-blue-500/5 border border-blue-500/10">
-              <div className="flex items-center gap-2 text-blue-400 font-semibold uppercase tracking-wider text-xs">
-                <Calendar className="w-4 h-4" />
-                Estimated Timeline
-              </div>
-              <p className="text-2xl font-bold text-slate-100 flex-grow flex items-center">
-                {result.timeline}
-              </p>
-              <p className="text-xs text-slate-500 italic">
-                *Based on typical project trajectories.
-              </p>
             </div>
           </div>
 
@@ -675,82 +536,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+
       )}
-
-      {/* Hidden PDF Export Area - rendered only on print */}
-      {result && (
-        <div id="pdf-export-area" style={{display: 'none'}}>
-          <div className="pdf-header">
-            <div>
-              <h1 style={{fontSize: '22px', fontWeight: 900, color: '#1e293b', marginBottom: '4px'}}>Explain My Plan — Strategic Report</h1>
-              <p style={{fontSize: '11px', color: '#64748b'}}>AI-Generated Strategic Plan</p>
-              <p style={{fontSize: '10px', color: '#94a3b8', marginTop: '4px'}}>Generated: {new Date().toLocaleString()}</p>
-            </div>
-            <div className="pdf-score-badge">{result.clarityScore}</div>
-          </div>
-
-          <div className="pdf-section-title">Core Goal</div>
-          <div className="pdf-card"><p style={{fontWeight: 600, color: '#1e293b'}}>{result.goal}</p></div>
-
-          <div className="pdf-section-title">Approach & Method</div>
-          <div className="pdf-card"><p style={{color: '#334155'}}>{result.method}</p></div>
-
-          <div className="pdf-section-title">Execution Roadmap</div>
-          <div className="pdf-card">
-            {result.steps?.map((step: string, i: number) => (
-              <p key={i} style={{marginBottom: '10px', paddingLeft: '14px', borderLeft: '3px solid #2563eb', fontSize: '12px', color: '#334155'}}>
-                <strong style={{color: '#2563eb'}}>Step {i+1}: </strong>{step}
-              </p>
-            ))}
-          </div>
-
-          <div className="pdf-grid-2">
-            <div>
-              <div className="pdf-section-title">Timeline</div>
-              <div className="pdf-card"><p style={{fontWeight: 700, color: '#1e293b', fontSize: '16px'}}>{result.timeline}</p></div>
-            </div>
-            <div>
-              <div className="pdf-section-title">AI Refined Summary</div>
-              <div className="pdf-card"><p style={{color: '#334155', fontStyle: 'italic'}}>{result.simplifiedVersion}</p></div>
-            </div>
-          </div>
-
-          <div className="page-break" />
-
-          <div className="pdf-section-title" style={{marginTop: '24px'}}>Risk Matrix (Devil's Advocate)</div>
-          {result.critique?.map((risk: string, i: number) => (
-            <div key={i} className="pdf-risk-section">
-              <p style={{fontSize: '9px', fontWeight: 700, color: '#ef4444', marginBottom: '2px'}}>⚠ RISK {i+1}</p>
-              <p style={{fontSize: '11px', color: '#334155', fontStyle: 'italic'}}>"{risk}"</p>
-            </div>
-          ))}
-
-          <div className="pdf-section-title" style={{marginTop: '16px'}}>Strategic Toolkit</div>
-          <div className="pdf-grid-3">
-            {result.toolkit?.map((tool: any, i: number) => (
-              <div key={i} className="pdf-card">
-                <p style={{fontWeight: 700, fontSize: '11px', color: '#2563eb', marginBottom: '4px'}}>{tool.name}</p>
-                <p style={{fontSize: '10px', color: '#64748b'}}>{tool.useCase}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="pdf-section-title" style={{marginTop: '16px'}}>Immediate Action Plan</div>
-          <div className="pdf-grid-2">
-            {result.actionableSteps?.map((step: string, i: number) => (
-              <div key={i} className="pdf-card" style={{display: 'flex', gap: '10px', alignItems: 'flex-start'}}>
-                <span style={{background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, flexShrink: 0}}>{i+1}</span>
-                <p style={{fontSize: '11px', color: '#334155'}}>{step}</p>
-              </div>
-            ))}
-          </div>
-
-          <div style={{borderTop: '2px solid #e2e8f0', marginTop: '24px', paddingTop: '12px', fontSize: '9px', color: '#94a3b8', textAlign: 'center' as const}}>
-            Generated by <strong>Explain My Plan</strong> &bull; AI-Powered Strategic Planning Tool &bull; Clarity Score: {result.clarityScore}/100
-          </div>
-        </div>
-      )}
-
 
       {/* Copy Success Toast */}
       <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] glass rounded-full px-6 py-3 bg-blue-600 border-blue-400 shadow-2xl shadow-blue-500/50 text-white text-sm font-bold flex items-center gap-3 transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}>

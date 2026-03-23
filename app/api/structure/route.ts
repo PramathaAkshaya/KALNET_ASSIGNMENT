@@ -21,12 +21,10 @@ export async function POST(req: Request) {
         "goal": "one crystal clear sentence",
         "method": "brief summary of the core approach",
         "steps": ["array of 5-8 concrete execution steps"],
-        "timeline": "estimated total duration",
         "missingElements": {
           "goalClarity": "brief assessment",
           "executionSteps": "brief assessment",
           "resources": "brief assessment",
-          "timeline": "brief assessment"
         },
         "simplifiedVersion": "a 1-sentence version a 5-year old could understand",
         "actionableSteps": ["array of 4 immediate, easy-to-start next steps"],
