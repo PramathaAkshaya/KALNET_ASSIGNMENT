@@ -42,15 +42,15 @@ export async function POST(req: Request) {
         ],
         "references": {
           "relatedLinks": [
-            {"name": "Site Name", "url": "https://...", "description": "brief what this site offers"},
-            {"name": "Site Name", "url": "https://...", "description": "brief what this site offers"}
+            {"name": "Real Site Name", "url": "https://www.actual-working-url.com", "description": "brief what this site offers"},
+            {"name": "Real Site Name", "url": "https://www.actual-working-url.com", "description": "brief what this site offers"}
           ],
           "costsAndBudgets": [
-            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
-            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
-            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
-            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"},
-            {"name": "Site Name", "url": "https://...", "description": "how to use for cost estimation"}
+            {"name": "Real Site Name", "url": "https://www.actual-working-url.com", "description": "how to use for cost estimation"},
+            {"name": "Real Site Name", "url": "https://www.actual-working-url.com", "description": "how to use for cost estimation"},
+            {"name": "Real Site Name", "url": "https://www.actual-working-url.com", "description": "how to use for cost estimation"},
+            {"name": "Real Site Name", "url": "https://www.actual-working-url.com", "description": "how to use for cost estimation"},
+            {"name": "Real Site Name", "url": "https://www.actual-working-url.com", "description": "how to use for cost estimation"}
           ],
           "funFacts": [
             {"fact": "an interesting short fact or trend about this topic"},
@@ -60,8 +60,12 @@ export async function POST(req: Request) {
         }
       }
       
+      CRITICAL INSTRUCTION FOR REFERENCES: 
+      You MUST provide REAL, WORKING, SPECIFIC URLs for the 'url' fields (e.g., "https://www.tripadvisor.com" or "https://www.makemytrip.com"). Do NOT output dummy links like "https://...". The links must be highly relevant specific websites for the user's idea.
+      
       Respond only with the JSON object. No extra text or markdown.
     `;
+
 
 
 
