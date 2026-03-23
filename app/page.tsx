@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb } from "lucide-react";
+import { Send, Sparkles, AlertCircle, CheckCircle2, ListTodo, Calendar, Target, Layers, Briefcase, Map, Zap, Search, ShieldAlert, Wrench, Thermometer, Cpu, Globe, DollarSign, Lightbulb, History, Clock } from "lucide-react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -10,12 +10,19 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  
+  const [history, setHistory] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const [showToast, setShowToast] = useState(false);
 
 
   useEffect(() => {
     setMounted(true);
+    try {
+      const saved = localStorage.getItem("planHistory");
+      if (saved) setHistory(JSON.parse(saved));
+    } catch(e) {}
   }, []);
 
   const handleGenerate = async () => {
@@ -41,6 +48,20 @@ export default function Home() {
       
       setResult(data);
       setIsGenerating(false);
+      
+      // Save to history
+      const newHistoryItem = {
+        id: Date.now().toString(),
+        timestamp: new Date().toLocaleString(),
+        inputidea: input,
+        result: data
+      };
+      setHistory(prev => {
+        const newHist = [newHistoryItem, ...prev].slice(0, 10); // keep last 10
+        localStorage.setItem("planHistory", JSON.stringify(newHist));
+        return newHist;
+      });
+
       setTimeout(() => {
         document.getElementById("results-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 500);
@@ -103,14 +124,24 @@ export default function Home() {
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Explain My Plan
           </div>
-          {result && (
+          <div className="flex items-center gap-4">
+            {result && (
+              <button 
+                onClick={handleReset}
+                className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+              >
+                Start Over
+              </button>
+            )}
             <button 
-              onClick={handleReset}
-              className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+              onClick={() => setShowHistory(true)}
+              className="text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
+              title="View History"
             >
-              Start Over
+              <History className="w-4 h-4" />
+              <span className="text-xs font-bold hidden sm:inline">History</span>
             </button>
-          )}
+          </div>
         </div>
       </nav>
 
@@ -545,6 +576,52 @@ export default function Home() {
         <CheckCircle2 className="w-4 h-4" />
         Copied to clipboard!
       </div>
+      {/* History Slide-over */}
+      {showHistory && (
+        <div className="fixed inset-0 z-[100] flex justify-end animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setShowHistory(false)} />
+          <div className="relative w-full max-w-sm h-full bg-slate-900 border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <History className="w-5 h-5 text-blue-400" />
+                Past Sessions
+              </h2>
+              <button onClick={() => setShowHistory(false)} className="text-slate-400 hover:text-white cursor-pointer px-2 py-1">
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {history.length === 0 ? (
+                <div className="text-center text-slate-500 mt-10 text-sm">No past searches found.</div>
+              ) : (
+                history.map((item) => (
+                  <button 
+                    key={item.id}
+                    onClick={() => {
+                      setInput(item.inputidea);
+                      setResult(item.result);
+                      setShowHistory(false);
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }, 100);
+                    }}
+                    className="w-full text-left glass rounded-xl p-4 hover:border-blue-500/50 transition-all group flex flex-col gap-2"
+                  >
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                      <Clock className="w-3 h-3" />
+                      {item.timestamp}
+                    </div>
+                    <p className="text-sm font-medium text-slate-200 line-clamp-2 group-hover:text-blue-300 transition-colors">
+                      "{item.inputidea}"
+                    </p>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
